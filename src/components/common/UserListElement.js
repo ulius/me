@@ -14,7 +14,7 @@ export default class UserListElement extends React.Component {
         <td>{user.protein}</td>
         <td>{user.carbs}</td>
         <td>{user.fat}</td>
-        <td>serving size</td>
+        <td>{user.servingSize}</td>
         <td>{user.amount}</td>
         <td>
           <Link to={'user-edit/' + user.id}>

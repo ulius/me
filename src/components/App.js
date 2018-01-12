@@ -33,11 +33,6 @@ export class App extends React.Component {
           {children}
         </div>
         <div className="footer">
-          <img src="/media/logo.svg"/>
-          <span>
-            Simple users app built with {' '}
-            <a href="http://redux-minimal.js.org/" target="_blank">redux-minimal</a>
-          </span>
         </div>
       </div>
     );
