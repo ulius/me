@@ -1,48 +1,39 @@
-import React from "react";
-import { connect } from "react-redux";
-import { ProgressBar } from "react-bootstrap";
-import Menu from "./common/Menu";
-import "../stylesheets/main.scss";
-import superagent from 'superagent';
+import React, { Component } from 'react'
+import { Dropdown, Icon, Menu, Segment } from 'semantic-ui-react'
+import { Route, Link } from 'react-router-dom'
+import FoodList from './food/FoodList'
+import FoodLog from './food/FoodLog'
+import FoodRecipes from './food/FoodRecipes'
 
-// App component
-export class App extends React.Component {
-  // pre-render logic
-  componentWillMount() {
-    // the first time we load the app, we need that users list
-    this.props.dispatch({type: 'USERS_FETCH_LIST'});
-  }
-
-  // render
+export default class App extends Component {
   render() {
-    // show the loading state while we wait for the app to load
-    const {users, children} = this.props;
-    if (!users.length) {
-      return (
-        <ProgressBar active now={100}/>
-      );
-    }
-
-    // render
     return (
-      <div className="container">
-        <div>
-          <Menu/>
-        </div>
-        <div>
-          {children}
-        </div>
-        <div className="footer">
-        </div>
+      <div>
+        <Menu attached='top'>
+          <Dropdown item text="Food">
+            <Dropdown.Menu>
+
+              <Link to="/food/log">
+                <Dropdown.Item>Log</Dropdown.Item>
+              </Link>
+
+              <Link to="/food/list">
+                <Dropdown.Item>List</Dropdown.Item>
+              </Link>
+
+              <Link to="/food/recipes">
+                <Dropdown.Item>Recipes</Dropdown.Item>
+              </Link>
+            </Dropdown.Menu>
+          </Dropdown>
+        </Menu>
+
+        <Segment attached='bottom'>
+          <Route path="/food/log" component={FoodLog}/>
+          <Route path="/food/list" component={FoodList}/>
+          <Route path="/food/recipes" component={FoodRecipes}/>
+        </Segment>
       </div>
-    );
+    )
   }
 }
-
-// export the connected class
-function mapStateToProps(state) {
-  return {
-    users: state.users || [],
-  };
-}
-export default connect(mapStateToProps)(App);

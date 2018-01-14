@@ -10,9 +10,9 @@ export default function users(state = {}, action) {
       return [...state, user];
 
     case 'USERS_EDIT_SAVE':
-      return state.map(user =>
-        Number(user.id) === Number(action.user.id) ? {...action.user} : user
-      );
+      // return state.map(user =>
+      //   Number(user.id) === Number(action.user.id) ? {...action.user} : user
+      // );
       break;
 
     case 'USERS_DELETE_SAVE':

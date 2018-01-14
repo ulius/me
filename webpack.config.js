@@ -1,49 +1,47 @@
-// http://webpack.github.io/docs/configuration.html
-// http://webpack.github.io/docs/webpack-dev-server.html
-var app_root = 'src'; // the app root folder: src, src_users, etc
-var path = require('path');
-var CleanWebpackPlugin = require('clean-webpack-plugin');
+const path = require("path");
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  app_root: app_root, // the app root folder, needed by the other webpack configs
-  entry: [
-    // http://gaearon.github.io/react-hot-loader/getstarted/
-    'webpack-dev-server/client?http://192.168.0.115:8080',
-    'webpack/hot/only-dev-server',
-    'babel-polyfill',
-    __dirname + '/' + app_root + '/index.js',
-  ],
+  entry: ["babel-polyfill", "./src/index.js"],
   output: {
-    path: __dirname + '/public/js',
-    publicPath: 'js/',
-    filename: 'bundle.js',
+    // path: path.resolve(__dirname, "dist"),
+    // filename: "js/[name].js"
+    path: path.resolve(__dirname, 'dist'),
+    filename: "bundle.js",
+    publicPath: "/"
+  },
+  devServer: {
+    contentBase: path.join(__dirname, "dist"),
+    host: "0.0.0.0",
+    historyApiFallback: true
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['react-hot', 'babel'],
         exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
       },
       {
-        // https://github.com/jtangelder/sass-loader
-        test: /\.scss$/,
-        loaders: ['style', 'css', 'sass'],
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader"
+          }
+        ]
       },
       {
         test: /\.css$/,
-        loaders: ['style', 'css'],
+        use: [ 'style-loader', 'css-loader' ]
       }
-    ],
-  },
-  devServer: {
-    contentBase: __dirname + '/public',
+    ]
   },
   plugins: [
-    new CleanWebpackPlugin(['css/main.css', 'js/bundle.js'], {
-      root: __dirname + '/public',
-      verbose: true,
-      dry: false, // true for simulation
-    }),
-  ],
+    new HtmlWebPackPlugin({
+      template: "./public/index.html",
+      filename: "./index.html"
+    })
+  ]
 };
