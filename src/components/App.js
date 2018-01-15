@@ -4,8 +4,14 @@ import { Route, Link } from 'react-router-dom'
 import FoodList from './food/FoodList'
 import FoodLog from './food/FoodLog'
 import FoodRecipes from './food/FoodRecipes'
+import {connect} from "react-redux";
+import { withRouter } from 'react-router-dom'
 
-export default class App extends Component {
+export class App extends Component {
+  componentWillMount() {
+    console.log("component mounting foodlist");
+    this.props.dispatch({type: 'USERS_FETCH_LIST'});
+  }
   render() {
     return (
       <div>
@@ -37,3 +43,11 @@ export default class App extends Component {
     )
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    users: state.users
+  };
+}
+
+export default withRouter(connect(mapStateToProps)(App));

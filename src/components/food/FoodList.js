@@ -5,21 +5,20 @@ const FormItem = Form.Item;
 
 export class FoodList extends Component {
   componentWillMount() {
-    console.log("component mounting foodlist")
-    this.props.dispatch({type: 'USERS_FETCH_LIST'});
+
   }
   render() {
     const columns = [
-      { title: 'name', dataIndex: 'name', key: 'name' },
-      { title: 'protein', dataIndex: 'protein', key: 'protein' },
-      { title: 'carbs', dataIndex: 'carbs', key: 'carbs' },
-      { title: 'fat', dataIndex: 'fat', key: 'fat' },
-      { title: 'serving size', dataIndex: 'servingSize', key: 'servingSize' },
-      { title: 'amount', dataIndex: 'amount', key: 'amount' },
+      { title: 'name', dataIndex: 'name'},
+      { title: 'protein', dataIndex: 'protein'},
+      { title: 'carbs', dataIndex: 'carbs'},
+      { title: 'fat', dataIndex: 'fat'},
+      { title: 'serving size', dataIndex: 'servingSize'},
+      { title: 'amount', dataIndex: 'amount'},
       ];
     const tableConfig = {
       bordered: true,
-      pagination: true,
+      pagination: false,
       size: 'small',
       rowSelection: {},
       scroll: undefined,
@@ -34,7 +33,9 @@ export class FoodList extends Component {
 
 function mapStateToProps(state) {
   return {
-    users: state.users
+    users: state.users.map(user => {
+      return {...user, key: user.id}
+    })
   };
 }
 
