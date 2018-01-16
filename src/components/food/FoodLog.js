@@ -9,47 +9,44 @@ export class FoodLog extends Component {
     return (
       <div>
         <DatePicker onChange={this.onChange} />
-        <Row>
-          <Col span={3}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={3}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={3}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={3}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={4}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={4}>
-            <EditableTable {...this.props} />
-          </Col>
-          <Col span={4}>
-            <EditableTable {...this.props} />
-          </Col>
-        </Row>
+        <EditableTable {...this.props} />
       </div>
     )
   }
 
 }
 ///
-const data = [];
-for (let i = 0; i < 5; i++) {
-  data.push({
-    key: i.toString(),
-    name: `food ${i}`,
-    protein: 1,
-    carbs: 2,
-    fat: 2,
-    servingSize: "grams",
-    amount: 2
-  });
-}
+// const data = [];
+
+  /**
+   * add new food
+   * use typeahead to find food
+   * data.push
+   * {
+   * source: {name: "chicken", protein: 6, carbs: 0, fat: .7, servingSize: "ounce", amount: 1},
+   * name: "chicken", protein: 6, carbs: 0, fat: .7, servingSize: "ounce", amount: .5
+   * };
+   * amount / source.amount
+   * eg:
+   * .5 / 1 = .5
+   * 6/1 = 6
+   * multiply this by source.protein, source.carbs, src.fat
+   *
+   *
+   *
+   *
+   *
+   { name: "chicken", protein: 6, carbs: 0, fat: .7, servingSize: "ounce", amount: 1 };
+   */
+  // data.push({
+  //   key: i.toString(),
+  //   name: `food ${i}`,
+  //   protein: 1,
+  //   carbs: 2,
+  //   fat: 2,
+  //   servingSize: "grams",
+  //   amount: 2
+  // });
 
 const EditableCell = ({ editable, value, onChange }) => (
   <div>
@@ -63,19 +60,20 @@ const EditableCell = ({ editable, value, onChange }) => (
 class EditableTable extends React.Component {
   constructor(props) {
     super(props);
+    this.onAutoCompleteSelect = this.onAutoCompleteSelect.bind(this);
     this.columns = [
       { title: 'name', dataIndex: 'name',render: (text, record) => this.renderName(text, record, 'name') },
-      { title: 'protein', dataIndex: 'protein', render: (text, record) => this.renderColumns(text, record, 'protein')},
-      { title: 'carbs', dataIndex: 'carbs', render: (text, record) => this.renderColumns(text, record, 'carbs')},
-      { title: 'fat', dataIndex: 'fat', render: (text, record) => this.renderColumns(text, record, 'fat')},
-      { title: 'serving size', dataIndex: 'servingSize', render: (text, record) => this.renderColumns(text, record, 'servingSize')},
+      { title: 'protein', dataIndex: 'protein'},
+      { title: 'carbs', dataIndex: 'carbs'},
+      { title: 'fat', dataIndex: 'fat'},
+      { title: 'serving size', dataIndex: 'servingSize'},
       { title: 'amount', dataIndex: 'amount', render: (text, record) => this.renderColumns(text, record, 'amount')},
     ];
     this.state = {
-      data: data,
+      logs: [],
       editable: false
     };
-    this.cacheData = data.map(item => ({...item}));
+    this.cacheData = this.state.logs.map(item => ({...item}));
   }
 
   renderColumns(text, record, column) {
@@ -88,52 +86,70 @@ class EditableTable extends React.Component {
     );
   }
 
+  onAutoCompleteSelect(value, option) {
+    const newData = [...this.state.logs];
+    // const target = newData.filter(item => key === item.key)[0];
+    const sourceFood = this.props.users.filter(item => value === item.name)[0];
+    if (target) {
+      // newData.push({
+      //   source: sourceFood,
+      //   name: sourceFood.name, protein: sourceFood.
+      // });
+      console.log(target)
+      // target[column] = value;
+      // this.setState({ logs: newData });
+    }
+  }
+
   renderName(text, record, column) {
-    const users = this.props.users.map(user => user.name)
+    console.log("text:", text);
+    console.log("record:", record);
+    console.log("column:", column);
+    const users = this.props.users.map(user => user.name).sort();
     return (
       <AutoComplete
-        style={{ width: 20 }}
+        style={{ width: 200 }}
+        key
         dataSource={ users }
         placeholder="try to type `b`"
-        key
+        onSelect={this.onAutoCompleteSelect}
         filterOption={(inputValue, option) => option.props.children.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
-        // filterOption={true}
       />
     );
   }
 
   handleChange(value, key, column) {
-    const newData = [...this.state.data];
+    const newData = [...this.state.logs];
     const target = newData.filter(item => key === item.key)[0];
     if (target) {
       target[column] = value;
-      this.setState({ data: newData });
+      this.setState({ logs: newData });
     }
   }
   edit(key) {
-    const newData = [...this.state.data];
+    const newData = [...this.state.logs];
     const target = newData.filter(item => key === item.key)[0];
     if (target) {
       target.editable = true;
-      this.setState({ data: newData });
+      this.setState({ logs: newData });
     }
   }
   save(key) {
-    const newData = [...this.state.data];
+    const newData = [...this.state.logs];
     const target = newData.filter(item => key === item.key)[0];
     if (target) {
       delete target.editable;
-      this.setState({ data: newData });
+      this.setState({ logs: newData });
       this.cacheData = newData.map(item => ({ ...item }));
     }
   }
   cancel(key) {
-    const newData = [...this.state.data];
+    const newData = [...this.state.logs];
     const target = newData.filter(item => key === item.key)[0];
     if (target) {
       Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
       delete target.editable;
-      this.setState({ data: newData });
+      this.setState({ logs: newData });
     }
   }
 
@@ -143,7 +159,7 @@ class EditableTable extends React.Component {
   }
 
   add() {
-    const newData = [...this.state.data];
+    const newData = [...this.state.logs];
     newData.unshift({
       key: (new Date).getTime(),
       name: `new food`,
@@ -153,12 +169,12 @@ class EditableTable extends React.Component {
       servingSize: "grams",
       amount: 0
     });
-    this.setState({ data: newData });
+    this.setState({ logs: newData });
   }
 
 
   render() {
-    console.log("food log props:", this.props.users)
+    console.log("food log props:", this.props.users);
     const tableConfig = {
       bordered: true,
       pagination: false,
@@ -168,7 +184,7 @@ class EditableTable extends React.Component {
       <div>
         <Button onClick={() => this.editAll()}>Edit</Button>
         <Button type="primary" onClick={() => this.add()}>Add</Button>
-        <Table {...tableConfig} dataSource={this.state.data} columns={this.columns} />
+        <Table {...tableConfig} dataSource={this.state.logs} columns={this.columns} />
       </div>
     )
   }
