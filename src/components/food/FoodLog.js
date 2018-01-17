@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 import { AutoComplete, DatePicker, Button, Row, Col } from 'antd';
-import { Table, Input, Popconfirm, Tag } from 'antd';
+import { TimePicker, Table, Input, Popconfirm, Tag } from 'antd';
 import {connect} from "react-redux";
 import _ from 'lodash'
+import moment from 'moment';
 
 
 export class FoodLog extends Component {
   render() {
     return (
       <div>
-        <DatePicker onChange={this.onChange} />
         <EditableTable {...this.props} />
       </div>
     )
@@ -31,6 +31,12 @@ class EditableTable extends React.Component {
     super(props);
     this.onAutoCompleteSelect = this.onAutoCompleteSelect.bind(this);
     this.columns = [
+      { title: 'time', dataIndex: 'time', render: (text, record, index) => this.renderTime(text, record, index),
+        // sorter: (a, b) => {
+        // console.log(a.time.unix(), b.time.unix());
+        // return a.time.unix() - b.time.unix();
+        // }, defaultSortOrder: "ascend"
+      },
       { title: 'name', dataIndex: 'name',render: (text, record, index) => this.renderName(text, record, index) },
       { title: 'amount', dataIndex: 'amount', render: (text, record, index) => this.renderColumns(text, record, index)},
       { title: 'serving size', dataIndex: 'servingSize'},
@@ -41,10 +47,37 @@ class EditableTable extends React.Component {
     ];
     this.state = {
       logs: [],
-      editable: false
+      editable: false,
+      date: moment()
     };
     this.cacheData = this.state.logs.map(item => ({...item}));
   }
+
+  onTimeChange = (time, timeString) => {
+   // console.log("onTimeChange", time, timeString);
+    const newData = [...this.state.logs];
+    const selectedLogRow = newData[this.state.autoCompleteIndex];
+    selectedLogRow.time = time;
+    this.setState({ logs: newData });
+  };
+
+  renderTime = (text, record, index) => {
+    // console.log(record)
+    return (
+      <div>
+        {this.state.editable
+          ? <TimePicker
+            onChange={this.onTimeChange}
+            format='HH:mm'
+            value={text}
+            minuteStep={30}
+            onOpenChange={() => this.state.autoCompleteIndex = index}
+            defaultOpenValue={moment('12:00:00', 'HH:mm')}
+            disabled={!this.state.editable}/> : text.format("HH:mm")
+        }
+      </div>
+    )
+  };
 
   renderColumns(text, record, index) {
     return (
@@ -61,56 +94,40 @@ class EditableTable extends React.Component {
     const newData = [...this.state.logs];
     const sourceFood = this.props.users.filter(item => value === item.name)[0];
     if (sourceFood) {
-      const oldKey = newData[this.state.currentAutoComplete]['key'];
-      newData[this.state.currentAutoComplete] =
-        {
-          source: sourceFood,
-          amount: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          calories: 0,
-          key: oldKey,
-          name: sourceFood.name,
-          servingSize: sourceFood.servingSize
-        };
-
+      const selectedLogRow = newData[this.state.autoCompleteIndex];
+      selectedLogRow.source = sourceFood;
+      selectedLogRow.name = sourceFood.name;
+      selectedLogRow.servingSize = sourceFood.servingSize;
     }
-    // const target = newData.filter(item => key === item.key)[0];
-    // target[column] = value;
     this.setState({ logs: newData });
   }
 
   onAutoCompleteChange = (index) => {
-    this.state.currentAutoComplete = index;
+    this.state.autoCompleteIndex = index;
   };
 
   renderName = (text, record, index) => {
     const users = this.props.users.map(user => user.name).sort();
     return (
-      <AutoComplete
-        style={{ width: 200 }}
-        key
-        autoFocus
-        value={text}
-        dataSource={ users }
-        onChange={() => this.onAutoCompleteChange(index)}
-        onSelect={this.onAutoCompleteSelect}
-        filterOption={(inputValue, option) => option.props.children.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
-      />
-    );
+      <div>
+        {this.state.editable
+          ? <AutoComplete
+            style={{ width: 200 }}
+            key
+            autoFocus
+            value={text}
+            dataSource={ users }
+            onChange={() => this.state.autoCompleteIndex = index}
+            onSelect={this.onAutoCompleteSelect}
+            filterOption={(inputValue, option) => option.props.children.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1}
+            disabled={!this.state.editable}
+          />
+          : text
+        }
+      </div>
+    )
   };
 
-// {
-//   source: sourceFood,
-//   amount: 0,
-//   protein: 0,
-//   carbs: 0,
-//   fat: 0,
-//   key: oldKey,
-//   name: sourceFood.name,
-//   servingSize: sourceFood.servingSize
-// };
   handleAmountChange = (value, key, index) => {
     const regex = /^(\d+\.?\d{0,9}|\.\d{1,2})$/;
     const isNumber = (value === '' || regex.test(value));
@@ -118,14 +135,14 @@ class EditableTable extends React.Component {
 
     const newData = [...this.state.logs];
     const target = this.state.logs[index];
-    console.log(target);
+    // console.log(target);
     if (target) {
       const multiplier = value / target.source.amount;
       target.amount = value;
-      target.protein = (multiplier * target.source.protein).toFixed(2);
-      target.carbs = (multiplier * target.source.carbs).toFixed(2);
-      target.fat = (multiplier * target.source.fat).toFixed(2);
-      target.calories = ((target.protein * 4) + (target.carbs * 4) + (target.fat * 9)).toFixed(2);
+      target.protein = Number.parseFloat((multiplier * target.source.protein).toFixed(2));
+      target.carbs = Number.parseFloat((multiplier * target.source.carbs).toFixed(2));
+      target.fat = Number.parseFloat((multiplier * target.source.fat).toFixed(2));
+      target.calories = Number.parseFloat(((target.protein * 4) + (target.carbs * 4) + (target.fat * 9)).toFixed(2));
 
       this.setState({ logs: newData });
     }
@@ -139,24 +156,6 @@ class EditableTable extends React.Component {
       this.setState({ logs: newData });
     }
   }
-  save(key) {
-    const newData = [...this.state.logs];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      delete target.editable;
-      this.setState({ logs: newData });
-      this.cacheData = newData.map(item => ({ ...item }));
-    }
-  }
-  cancel(key) {
-    const newData = [...this.state.logs];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      Object.assign(target, this.cacheData.filter(item => key === item.key)[0]);
-      delete target.editable;
-      this.setState({ logs: newData });
-    }
-  }
 
   editAll() {
     this.setState({ editable: !this.state.editable })
@@ -166,6 +165,7 @@ class EditableTable extends React.Component {
     const newData = [...this.state.logs];
     newData.push({
       key: (new Date).getTime(),
+      time: moment().set("hour", 12).set("minute", 0).set("second", 0).set("millisecond", 0),
       name: "",
       protein: 0,
       carbs: 0,
@@ -183,24 +183,24 @@ class EditableTable extends React.Component {
   renderFooter = () => {
     return (
       <div>
-        <Tag>
+        <Tag color="#D68F92">
           Protein:{' '}
-          {_.sumBy(this.state.logs, "protein")}
+          {_.sumBy(this.state.logs, "protein").toFixed(2)}
         </Tag>
 
-        <Tag>
+        <Tag color="blue">
           Carbs:{' '}
-          {_.sumBy(this.state.logs, "carbs")}
+          {_.sumBy(this.state.logs, "carbs").toFixed(2)}
+        </Tag>
+
+        <Tag color="volcano">
+          Fat:{' '}
+          {_.sumBy(this.state.logs, "fat").toFixed(2)}
         </Tag>
 
         <Tag>
-          Fat:{' '}
-          {_.sumBy(this.state.logs, "fat")}
-        </Tag>
-
-        <Tag>
-          Fat:{' '}
-          {_.sumBy(this.state.logs, "calories")}
+          Calories:{' '}
+          {_.sumBy(this.state.logs, "calories").toFixed(2)}
         </Tag>
       </div>
     );
@@ -215,12 +215,17 @@ class EditableTable extends React.Component {
     };
     return (
       <div>
-        <Button onClick={() => this.editAll()}>Edit</Button>
+        <DatePicker defaultValue={this.state.date} onChange={this.onChange}/>
+        <Button onClick={() => this.editAll()}>
+          {this.state.editable ? "Save" : "Edit"}
+        </Button>
         <Button type="primary" onClick={() => this.add()}>Add</Button>
         <Table {...tableConfig}
                dataSource={this.state.logs}
                columns={this.columns}
-               footer={this.renderFooter}/>
+               footer={this.renderFooter}
+               size="small"
+        />
       </div>
     )
   }
