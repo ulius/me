@@ -9,7 +9,6 @@ import { withRouter } from 'react-router-dom'
 
 export class App extends Component {
   componentWillMount() {
-    console.log("component mounting foodlist");
     this.props.dispatch({type: 'USERS_FETCH_LIST'});
   }
   render() {

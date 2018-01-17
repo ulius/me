@@ -35,7 +35,6 @@ export default class ApiUsers {
   // }
 
   static getList() {
-    console.log("ULI");
     return superagent.get("http://192.168.0.115:8081/foods")
   }
 
