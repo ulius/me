@@ -31,19 +31,22 @@ class EditableTable extends React.Component {
     super(props);
     this.onAutoCompleteSelect = this.onAutoCompleteSelect.bind(this);
     this.columns = [
-      { title: 'time', dataIndex: 'time', render: (text, record, index) => this.renderTime(text, record, index),
+      { title: 'pro', dataIndex: 'protein', width: 60},
+      { title: 'carb', dataIndex: 'carbs', width: 60},
+      { title: 'fat', dataIndex: 'fat', width: 60},
+      { title: 'cals', dataIndex: 'calories', width: 75},
+      { title: 'serving size', dataIndex: 'servingSize', width: 100},
+      { title: 'amount', dataIndex: 'amount', width: 75,
+        render: (text, record, index) => this.renderColumns(text, record, index)},
+      { title: 'name', dataIndex: 'name', width: 150,
+        render: (text, record, index) => this.renderName(text, record, index) },
+      { title: 'time', dataIndex: 'time',
+        render: (text, record, index) => this.renderTime(text, record, index),
         // sorter: (a, b) => {
         // console.log(a.time.unix(), b.time.unix());
         // return a.time.unix() - b.time.unix();
         // }, defaultSortOrder: "ascend"
       },
-      { title: 'name', dataIndex: 'name',render: (text, record, index) => this.renderName(text, record, index) },
-      { title: 'amount', dataIndex: 'amount', render: (text, record, index) => this.renderColumns(text, record, index)},
-      { title: 'serving size', dataIndex: 'servingSize'},
-      { title: 'protein', dataIndex: 'protein'},
-      { title: 'carbs', dataIndex: 'carbs'},
-      { title: 'fat', dataIndex: 'fat'},
-      { title: 'calories', dataIndex: 'calories'},
     ];
     this.state = {
       logs: [],
