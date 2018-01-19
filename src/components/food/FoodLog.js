@@ -54,6 +54,11 @@ class EditableTable extends React.Component {
       date: moment()
     };
     this.cacheData = this.state.logs.map(item => ({...item}));
+    console.log("ULI")
+    // console.log( moment().format("yyyy-MM-dd'T'HH:mm:ss'Z'") )
+    console.log(
+      moment.utc().format('YYYY-MM-DD[T]HH:mm:ss[Z]')
+    )
   }
 
   onTimeChange = (time, timeString) => {
